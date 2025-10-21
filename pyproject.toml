@@ -1,4 +1,8 @@
 # build command: `python -m build`
+# upload command: `python -m twine upload dist/*`
+# token location: ~/.pypirc
+
+# dev install: `pip install -e ~/Code/markdowntest`
 
 [project]
 name = "markdowntest"
