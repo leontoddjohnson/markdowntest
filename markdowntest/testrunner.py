@@ -68,7 +68,7 @@ class MarkdownTestResult(result.TestResult):
 
         if err:
             error = {
-                "name": err[1].__class__.__name__,
+                "name": err[0].__name__,
                 "details": err[1]
             }
         else:
