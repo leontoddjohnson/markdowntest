@@ -1,8 +1,11 @@
-# build command: `python -m build`
-# upload command: `python -m twine upload dist/*`
+# build: `python -m build`
+# upload: `python -m twine upload dist/*`
+# only latest upload: `python -m twine upload --skip-existing dist/*`
+
 # token location: ~/.pypirc
 
 # dev install: `pip install -e ~/Code/markdowntest`
+# vscode dev: python.analysis.extraPaths: ["/Users/leonjohn/Code/markdowntest"]
 
 [project]
 name = "markdowntest"
