@@ -102,24 +102,43 @@ class MarkdownTestResult(result.TestResult):
         super(MarkdownTestResult, self).addFailure(test, err)
         self.processResult(test, err)
 
-    def stopTestRun(self):
+    def writeOverview(self):
+        passed = [r['weight'] for r in self.results if r['status'] == 'passed']
+        failed = [r['weight'] for r in self.results if r['status'] == 'failed']
 
+        self.stream.write(f"\n\nStatus | Count | Weight")
+        self.stream.write(f"\n--- | --- | ---")
+        self.stream.write(f"\nPassed | {len(passed)} | {sum(passed)}")
+        self.stream.write(f"\nFailed | {len(failed)} | {sum(failed)}")
+
+        # optional weighted score
+        # perc_passed = round(sum(passed) / (sum(passed) + sum(failed)), 4)
+        # perc_passed *= 100
+        # self.stream.write(f"\n\nWeighted Score = {perc_passed}%")
+
+    def writeResult(self, result):
+        self.stream.write(f"\n\n## {result['number']}) ")
+        self.stream.write(f"{result['name']} -- ")
+        self.stream.write(f"{result['status']}\n")
+        self.stream.write(f"**Description:**\n{result['description']}")
+        self.stream.write(f" (weight = {result['weight']})\n")
+        self.stream.write("\n**Output:**\n```bash\n")
+        self.stream.write(f"{result['output']}\n```\n")
+
+        if result['error']:
+            self.stream.write("<details>\n<summary>")
+            self.stream.write(f"{result['error']['name']}")
+            self.stream.write("</summary>\n\n")
+            self.stream.write(f"```python\n{result['error']['details']}\n")
+            self.stream.write("```\n\n</details>")
+
+    def stopTestRun(self):
+        
+        self.writeOverview()
         results = sorted(self.results, key=lambda s: s['number'])
 
         for result in results:
-            self.stream.write(f"\n\n## {result['number']}) ")
-            self.stream.write(f"{result['name']} -- ")
-            self.stream.write(f"{result['status']}\n")
-            self.stream.write(f"**Description:**\n{result['description']}\n")
-            self.stream.write("\n**Output:**\n```bash\n")
-            self.stream.write(f"{result['output']}\n```\n")
-
-            if result['error']:
-                self.stream.write("<details>\n<summary>")
-                self.stream.write(f"{result['error']['name']}")
-                self.stream.write("</summary>\n\n")
-                self.stream.write(f"```python\n{result['error']['details']}\n")
-                self.stream.write("```\n\n</details>")
+            self.writeResult(result)
 
         self.stopTime = datetime.now()
         self.stream.write(f"\n<br>Tests stopped at {self.stopTime}.")
