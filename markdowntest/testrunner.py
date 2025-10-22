@@ -8,7 +8,7 @@ from unittest import result, TextTestRunner
 
 
 class MarkdownTestResult(result.TestResult):
-    def __init__(self, stream, descriptions, verbosity):
+    def __init__(self, stream, descriptions, verbosity, debug=False):
         
         super(MarkdownTestResult, self) \
             .__init__(stream, descriptions, verbosity)
@@ -16,10 +16,15 @@ class MarkdownTestResult(result.TestResult):
         self.stream = stream
         self.descriptions = descriptions
         self.verbosity = verbosity
-
+        self.debug = debug
         self.results = []
 
     def startTestRun(self):
+        # buffer stdout/stderr for markdown
+        self.buffer = True
+
+        # show local variables in traceback
+        self.tb_locals = True if self.debug else False
 
         self.startTime = datetime.now().strftime('%H:%M:%S on %a, %d %b %Y')
 
@@ -69,7 +74,8 @@ class MarkdownTestResult(result.TestResult):
         if err:
             error = {
                 "name": err[0].__name__,
-                "details": err[1]
+                "details": err[1],
+                "traceback": self._exc_info_to_string(err, test)
             }
         else:
             error = None
@@ -123,13 +129,14 @@ class MarkdownTestResult(result.TestResult):
         self.stream.write(f"**Description:**\n{result['description']}")
         self.stream.write(f" (weight = {result['weight']})\n")
         self.stream.write("\n**Output:**\n```bash\n")
-        self.stream.write(f"{result['output']}\n```\n")
+        self.stream.write(f"{result['output']}```\n")
 
         if result['error']:
+            show = 'traceback' if self.debug else 'details'
             self.stream.write("<details>\n<summary>")
             self.stream.write(f"{result['error']['name']}")
             self.stream.write("</summary>\n\n")
-            self.stream.write(f"```python\n{result['error']['details']}\n")
+            self.stream.write(f"```python\n{result['error'][show]}\n")
             self.stream.write("```\n\n</details>")
 
     def stopTestRun(self):
@@ -146,14 +153,15 @@ class MarkdownTestResult(result.TestResult):
         super(MarkdownTestResult, self).stopTestRun()
 
 class MarkdownTestRunner(TextTestRunner):
-    def __init__(self, filestream, descriptions=True, verbosity=2):
+    def __init__(self, filestream, descriptions=True, verbosity=2, debug=False):
 
         super(MarkdownTestRunner, self).__init__()
         
-        self.filestream = filestream    # not to overwrite self.stream?
+        self.filestream = filestream    # not to overwrite self.stream
         self.descriptions = descriptions
         self.verbosity = verbosity
+        self.debug = debug      # if true, show error traceback; else, details
 
     def _makeResult(self):
         return MarkdownTestResult(
-            self.filestream, self.descriptions, self.verbosity)
+            self.filestream, self.descriptions, self.verbosity, self.debug)
