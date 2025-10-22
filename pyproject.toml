@@ -9,7 +9,7 @@
 
 [project]
 name = "markdowntest"
-version = "0.0.3"
+version = "0.0.4"
 authors = [
   { name="Leon Johnson", email="leonjohn@iu.edu" },
 ]
