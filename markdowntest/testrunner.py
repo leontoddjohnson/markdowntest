@@ -21,7 +21,7 @@ class MarkdownTestResult(result.TestResult):
 
     def startTestRun(self):
 
-        self.startTime = datetime.now()
+        self.startTime = datetime.now().strftime('%H:%M:%S on %a, %d %b %Y')
 
         self.stream.write(
             f"\n\nTests started at {self.startTime}."
@@ -140,8 +140,8 @@ class MarkdownTestResult(result.TestResult):
         for result in results:
             self.writeResult(result)
 
-        self.stopTime = datetime.now()
-        self.stream.write(f"\n<br>Tests stopped at {self.stopTime}.")
+        self.stopTime = datetime.now().strftime('%H:%M:%S on %a, %d %b %Y')
+        self.stream.write(f"\n\n<br>Tests stopped at {self.stopTime}.")
         
         super(MarkdownTestResult, self).stopTestRun()
 
